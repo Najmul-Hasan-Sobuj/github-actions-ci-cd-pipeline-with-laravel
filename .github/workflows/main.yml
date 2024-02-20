@@ -49,7 +49,7 @@ jobs:
             uses: ngocquyhoang/deploy@laravel
             with:
                 user: najmulha
-                host: ftp.najmulhasan.xyz
+                host: najmulhasan.xyz
                 path: /public_html/
                 owner: najmul
             env:
