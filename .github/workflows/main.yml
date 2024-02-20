@@ -14,7 +14,7 @@ jobs:
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@4.0.0
       with:
-        server: ftp.najmulha.xyz
+        server: najmulha.xyz
         username: najmulha
         password: 8o@V1uL9jRF0-o
         server-dir: /public_html/
