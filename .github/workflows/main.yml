@@ -1,61 +1,52 @@
-# on:
-#   push:
-#     branches:
-#       - main
-# name: 🚀 Deploy website on push
-# jobs:
-#   web-deploy:
-#     name: 🎉 Deploy
-#     runs-on: ubuntu-latest
-#     steps:
-#     - name: 🚚 Get latest code
-#       uses: actions/checkout@v2.3.2
-    
-#     - name: 📦 Compile css and javascript
-#       run: npm install && npm run build
-
-#       - name:
-
-
-
-#     - name: 📂 Sync files
-#       uses: SamKirkland/FTP-Deploy-Action@4.0.0
-#       with:
-#         server: ftp.najmulhasan.xyz
-#         username: najmulha
-#         password: 8o@V1uL9jRF0-o
-#         server-dir: /public_html/
-
-
-name: Deploy Laravel Application
+name: 🚀 Deploy website on push
 
 on:
   push:
     branches:
-      - main 
+      - main
 
 jobs:
-  create-deployment-artifacts:
-    name: Create Deployment Artifacts
+  web-deploy:
+    name: 🎉 Deploy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v2.3.2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
+    - name: 📦 Setup Node
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
 
-      - name: Compile css and javascript
-        env:
-          LARAVEL_BYPASS_ENV_CHECK: 1
-        run: npm install && npm run build
+    - name: 📦 Compile css and javascript
+      run: |
+        npm install
+        npm run prod
 
-      - name: Configure PHP 8.1
-        uses: shivammathur/setup-php@master
-        with: 
-          php-version: '8.1'
-          extensions: mbstring, intl, bcmath, pdo, pdo_mysql, zip, exif, pcntl, gd, soap, xsl, xml, xmlrpc, zip, opcache, mysqli, curl, dom, fileinfo, ftp, json, pdo_sqlite, sqlite3, tokenizer, xml, xmlreader, xmlwriter, xdebug, imagick, imap, ldap, memcached, mongodb, redis, ssh2, yaml, apcu, apcu_bc, igbinary, msgpack, oauth, raphf, propro, pthreads, uuid, xhprof, zmq, amqp, ast, ds, enchant, gmagick, gnupg, grpc, gmp
+    - name: 🔐 Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql
+        coverage: none
 
-      - name: Install Composer
-        run: composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-progress --no-suggest
+    - name: 📦 Install Composer Dependencies
+      run: composer install --no-dev --optimize-autoloader
+
+    - name: 🔄 Generate Key
+      run: php artisan key:generate --force
+
+    - name: 🚚 Optimize
+      run: |
+        php artisan optimize
+        php artisan config:cache
+        php artisan route:cache
+        php artisan view:cache
+
+    - name: 📂 Sync files
+      uses: SamKirkland/FTP-Deploy-Action@4.0.0
+      with:
+        server: ftp.najmulhasan.xyz
+        username: najmulha
+        password: o@V1uL9jRF0-o
+        server-dir: /public_html/
