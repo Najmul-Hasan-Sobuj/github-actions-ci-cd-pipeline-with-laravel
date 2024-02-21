@@ -27,4 +27,4 @@ jobs:
           server: ftp.najmulhasan.xyz
           username: najmulha
           password: o@V1uL9jRF0-o
-          server-dir: /home/najmulha/
+          server-dir: /home/najmulha/public_html
