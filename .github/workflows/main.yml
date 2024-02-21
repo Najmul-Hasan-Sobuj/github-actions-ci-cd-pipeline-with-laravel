@@ -50,7 +50,7 @@ jobs:
 
         run: |
           npm install
-          npm run production
+          npm run prod
           
 
       - name: Configure PHP 8.1
