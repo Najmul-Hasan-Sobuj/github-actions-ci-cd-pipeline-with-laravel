@@ -1,34 +1,62 @@
-name: CD
- 
 on:
   push:
-    branches: [ production ]
- 
+    branches:
+      - main
+name: 🚀 Deploy website on push
 jobs:
-  deploy:
+  web-deploy:
+    name: 🎉 Deploy
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v2.3.2
+    
+    - name: 📂 Sync files
+      uses: SamKirkland/FTP-Deploy-Action@4.0.0
       with:
-        token: ${{ secrets.PUSH_TOKEN }}
-    - name: Set up Node
-      uses: actions/setup-node@v1
-      with:
-        node-version: '12.x'
-    - run: npm install
-    - run: npm run production
-    - name: Commit built assets
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git checkout -B deploy
-        git add -f public/
-        git commit -m "Build front-end assets"
-        git push -f origin deploy
-    - name: Deploy to production
-      uses: appleboy/ssh-action@master
-      with:
-        username: ${{ secrets.FTP_USERNAME }}
-        host: ${{ secrets.FTP_SERVER }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        script: 'cd /var/www/html && ./server_deploy.sh'
+        server: ftp.najmulhasan.xyz
+        username: najmulha
+        password: 8o@V1uL9jRF0-o
+        server-dir: /public_html/
+
+
+        # name: Deploy Laravel Project on push
+        # on:
+        #   push:
+        #     branches:
+        #       - main
+        # jobs:
+        #   web-deploy:
+        #     name: Deploy
+        #     runs-on: ubuntu-latest
+        #     steps:
+        #       - name: Get the latest code
+        #         uses: actions/checkout@v2.3.2
+        #       - name: Setup Node.js
+        #         uses: actions/setup-node@v2
+        #       - name: Copy .env
+        #         run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+        #       - name: Get Composer Cache Directory
+        #         id: composer-cache
+        #         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+        #       - name: Cache dependencies
+        #         uses: actions/cache@v2
+        #         with:
+        #           path: ${{ steps.composer-cache.outputs.dir }}
+        #           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        #           restore-keys: ${{ runner.os }}-composer-
+        #       - name: Install Dependencies
+        #         run: composer install --ignore-platform-reqs
+        #       - name: Generate key
+        #         run: php artisan key:generate
+        #       - name: Generate storage link
+        #         run: php artisan storage:link
+        #       - name: Directory Permissions
+        #         run: chmod -R 777 storage bootstrap/cache
+        #       - name: 📂 Sync files
+        #         uses: SamKirkland/FTP-Deploy-Action@4.0.0
+        #         with:
+        #           server: ${{ secrets.FTP_SERVER }}
+        #           username: ${{ secrets.FTP_USERNAME }}
+        #           password: ${{ secrets.FTP_PASSWORD }}
+        #           server-dir: /public_html/
