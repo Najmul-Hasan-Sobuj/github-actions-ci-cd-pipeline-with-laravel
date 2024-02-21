@@ -41,6 +41,14 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Cache Composer Dependencies
+      uses: actions/cache@v2
+      with:
+        path: vendor
+        key: composer-2-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          composer-
+
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
