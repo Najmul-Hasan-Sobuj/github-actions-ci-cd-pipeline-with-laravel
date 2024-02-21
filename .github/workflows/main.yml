@@ -27,30 +27,31 @@
 #         server-dir: /public_html/
 
 
+name: Deploy Laravel Application
+
 on:
   push:
-      branches:
-          - main
+    branches:
+      - main  # Set this to your default branch
 
 jobs:
-  build:
-      name: Build and Deploy
-      runs-on: ubuntu-latest
-      steps:
-          - name: Checkout Repository
-            uses: actions/checkout@master
-          - name: Setup Environment
-            uses: shivammathur/setup-php@v2
-            with:
-                php-version: '8.1'
-          - name: Install Packages
-            run: composer install --no-dev
-          - name: Deploy to Server
-            uses: ngocquyhoang/deploy@laravel
-            with:
-                user: najmulha
-                host: najmulhasan.xyz
-                path: /public_html/
-                owner: najmul
-            env:
-                DEPLOY_KEY: 8o@V1uL9jRF0-o
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1' 
+        
+    - name: Copy .env file
+      run: cp .env.example .env
+
+    - name: Run composer install
+      run: composer install --no-interaction 
+    
+    - name: Run Test Suite
+      run: php artisan test
+    
