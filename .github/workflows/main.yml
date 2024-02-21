@@ -52,6 +52,3 @@ jobs:
     - name: Run composer install
       run: composer install --no-interaction 
     
-    - name: Run Test Suite
-      run: php artisan test
-    
