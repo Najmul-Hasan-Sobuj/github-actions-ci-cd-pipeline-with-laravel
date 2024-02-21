@@ -32,31 +32,39 @@ name: Deploy Laravel Application
 on:
   push:
     branches:
-      - main  # Set this to your default branch
+      - main 
 
 jobs:
-  deploy:
+
+  create-deployment-artifacts:
+
+    name: Create Deployment Artifacts
+
     runs-on: ubuntu-latest
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
 
-    - name: Cache Composer Dependencies
-      uses: actions/cache@v2
-      with:
-        path: vendor
-        key: composer-2-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          composer-
+      - uses: actions/checkout@v2
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.1' 
-        
-    - name: Copy .env file
-      run: cp .env.example .env
+      - name: Compile css and javascript
 
-    - name: Run composer install
-      run: composer install --no-interaction 
-    
+        run: |
+          npm install
+          npm run production
+          
+
+      - name: Configure PHP 8.1
+
+        uses: shivammathur/setup-php@master
+
+        with: 
+
+          php-version: 8.1
+
+          extensions: mbstring, intl, bcmath, pdo, pdo_mysql, zip, exif, pcntl, gd, soap, xsl, xml, xmlrpc, zip, opcache, mysqli, curl, dom, fileinfo, ftp, json, pdo_sqlite, sqlite3, tokenizer, xml, xmlreader, xmlwriter, xdebug, imagick, imap, ldap, memcached, mongodb, redis, ssh2, yaml, apcu, apcu_bc, igbinary, msgpack, oauth, raphf, propro, pthreads, uuid, xhprof, zmq, amqp, ast, ds, enchant, gmagick, gnupg, grpc, gmp
+
+      - name: Install Composer
+
+        run: composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-progress --no-suggest
+
+
