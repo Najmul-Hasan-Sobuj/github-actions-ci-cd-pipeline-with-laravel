@@ -35,33 +35,27 @@ on:
       - main 
 
 jobs:
-
   create-deployment-artifacts:
-
     name: Create Deployment Artifacts
-
     runs-on: ubuntu-latest
-
     steps:
-
       - uses: actions/checkout@v2
 
-      - name: Compile css and javascript
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
 
-        run: npm install && npm run dev
+      - name: Compile css and javascript
+        env:
+          LARAVEL_BYPASS_ENV_CHECK: 1
+        run: npm install && npm run build
 
       - name: Configure PHP 8.1
-
         uses: shivammathur/setup-php@master
-
         with: 
-
-          php-version: 8.1
-
+          php-version: '8.1'
           extensions: mbstring, intl, bcmath, pdo, pdo_mysql, zip, exif, pcntl, gd, soap, xsl, xml, xmlrpc, zip, opcache, mysqli, curl, dom, fileinfo, ftp, json, pdo_sqlite, sqlite3, tokenizer, xml, xmlreader, xmlwriter, xdebug, imagick, imap, ldap, memcached, mongodb, redis, ssh2, yaml, apcu, apcu_bc, igbinary, msgpack, oauth, raphf, propro, pthreads, uuid, xhprof, zmq, amqp, ast, ds, enchant, gmagick, gnupg, grpc, gmp
 
       - name: Install Composer
-
         run: composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-progress --no-suggest
-
-
