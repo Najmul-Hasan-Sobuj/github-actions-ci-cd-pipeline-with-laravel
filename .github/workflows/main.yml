@@ -9,14 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 🚚 Get latest code
-        uses: actions/checkout@v3 # Updated to v3
+        uses: actions/checkout@v2
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.1
       - name: Cache Composer packages
         id: composer-cache
-        uses: actions/cache@v3 # Updated to v3
+        uses: actions/cache@v2
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
@@ -25,9 +25,9 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
       - name: 📂 Sync files
-        uses: SamKirkland/FTP-Deploy-Action@4.1.0 # Updated to 4.1.0 or check for the latest version that supports Node.js 20
+        uses: SamKirkland/FTP-Deploy-Action@4.0.0
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: public_html/
+          server-dir: public_html/laravel-app/
