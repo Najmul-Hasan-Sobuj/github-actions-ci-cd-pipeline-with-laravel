@@ -24,6 +24,12 @@ jobs:
             ${{ runner.os }}-php-
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
+
+      - name: List all files
+        run: |
+          echo "Listing all files in repository:"
+          find . -type f
+
       - name: 📂 Sync files
         uses: SamKirkland/FTP-Deploy-Action@4.0.0
         with:
