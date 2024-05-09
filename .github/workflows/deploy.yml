@@ -1,4 +1,4 @@
-name: production CI/CD
+name: Production CI/CD
 
 on:
   push:
@@ -34,7 +34,6 @@ jobs:
           echo "RELEASE_PATH=/root/release/$(basename $PWD)" >> $GITHUB_ENV
           echo "SERVER_HOST=api-production-1.web3corp.com" >> $GITHUB_ENV
 
-      # the branch name above need to be hardcoded as a variable
       - name: Checkout Repository
         uses: actions/checkout@v4
 
@@ -42,16 +41,13 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            $GITHUB_WORKSPACE/html/${{ env.WEBSITE_NAME }}/.env
             $GITHUB_WORKSPACE/html/${{ env.WEBSITE_NAME }}/vendor/
             $GITHUB_WORKSPACE/html/${{ env.WEBSITE_NAME }}/composer.lock
           key: ${{ runner.os }}-vendor-${{ hashFiles('**/composer.lock') }}
 
       - name: Built artifacts files
-        # local.env to be replaced by the /root/secret
         run: |
-          cp $GITHUB_WORKSPACE/deploy/local.env html/${{ env.WEBSITE_NAME }}/.env
-          sed -i 's/NODE_ENV=.*/NODE_ENV=${{ env.BRANCH_NAME }}/' html/${{ env.WEBSITE_NAME }}/.env
+          sed -i 's/NODE_ENV=.*/NODE_ENV=${{ env.BRANCH_NAME }}/' $GITHUB_WORKSPACE/html/${{ env.WEBSITE_NAME }}/.env
           cd $GITHUB_WORKSPACE/html/${{ env.WEBSITE_NAME }} && composer install
 
       - name: Persist artifact files
@@ -59,7 +55,6 @@ jobs:
         with:
           name: artifacts
           path: |
-            ${{ github.workspace }}/html/${{ env.WEBSITE_NAME }}/.env
             ${{ github.workspace }}/html/${{ env.WEBSITE_NAME }}/vendor/
             ${{ github.workspace }}/html/${{ env.WEBSITE_NAME }}/composer.lock
 
