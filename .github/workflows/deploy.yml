@@ -1,0 +1,84 @@
+name: production CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      are_you_sure:
+        description: "WARNING! Are you sure? And you are responsible for this manual run!"
+        required: true
+
+jobs:
+  continue-delivery-jobs:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    container:
+      image: php:8.1
+
+    steps:
+      - name: Install dependencies
+        run: |
+          curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+          apt-get update && apt-get install -y unzip libzip-dev git
+          docker-php-ext-install zip
+          docker-php-ext-enable zip
+
+      - name: Set global variables
+        run: |
+          echo "REPO_NAME=$(basename $PWD)" >> $GITHUB_ENV
+          echo "BRANCH_NAME=$(echo ${{ github.ref }} | awk -F'/' '{print $3}')" >> $GITHUB_ENV
+          echo "WEBSITE_NAME=najmulhasan.xyz" >> $GITHUB_ENV
+          echo "RELEASE_PATH=/root/release/$(basename $PWD)" >> $GITHUB_ENV
+          echo "SERVER_HOST=api-production-1.web3corp.com" >> $GITHUB_ENV
+
+      # the branch name above need to be hardcoded as a variable
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Cache artifact built
+        uses: actions/cache@v2
+        with:
+          path: |
+            $GITHUB_WORKSPACE/html/${{ env.WEBSITE_NAME }}/.env
+            $GITHUB_WORKSPACE/html/${{ env.WEBSITE_NAME }}/vendor/
+            $GITHUB_WORKSPACE/html/${{ env.WEBSITE_NAME }}/composer.lock
+          key: ${{ runner.os }}-vendor-${{ hashFiles('**/composer.lock') }}
+
+      - name: Built artifacts files
+        # local.env to be replaced by the /root/secret
+        run: |
+          cp $GITHUB_WORKSPACE/deploy/local.env html/${{ env.WEBSITE_NAME }}/.env
+          sed -i 's/NODE_ENV=.*/NODE_ENV=${{ env.BRANCH_NAME }}/' html/${{ env.WEBSITE_NAME }}/.env
+          cd $GITHUB_WORKSPACE/html/${{ env.WEBSITE_NAME }} && composer install
+
+      - name: Persist artifact files
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifacts
+          path: |
+            ${{ github.workspace }}/html/${{ env.WEBSITE_NAME }}/.env
+            ${{ github.workspace }}/html/${{ env.WEBSITE_NAME }}/vendor/
+            ${{ github.workspace }}/html/${{ env.WEBSITE_NAME }}/composer.lock
+
+      - name: Rsync Release
+        uses: burnett01/rsync-deployments@6.0.0
+        with:
+          switches: -avzr --delete --exclude=".git/" --exclude="README.md" --include="" --filter=""
+          remote_path: ${{ env.RELEASE_PATH }}
+          remote_host: ${{ env.SERVER_HOST }}
+          remote_user: root
+          remote_key: ${{ secrets.DEPLOY_KEY }}
+
+      - name: SSH Website Up
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ env.SERVER_HOST }}
+          username: root
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: 22
+          script: |
+            chmod +x /root/release/${{ env.REPO_NAME }}/deploy/${{ env.REPO_NAME }}.sh
+            /root/release/${{ env.REPO_NAME }}/deploy/${{ env.REPO_NAME }}.sh
