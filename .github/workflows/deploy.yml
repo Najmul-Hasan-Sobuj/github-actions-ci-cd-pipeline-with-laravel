@@ -25,10 +25,10 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2  # Set up the specified PHP version
         with:
-          php-version: '8.0'  # Specify the PHP version you are using
+          php-version: '8.1'  # Specify the PHP version you are using
 
       - name: Install Composer dependencies
-        run: composer install --ignore-platform-reqs        # Install Laravel dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest --ignore-platform-reqs  # Install Laravel dependencies
 
       - name: Copy .env.example to .env
         run: cp .env.example .env  # Copy the example environment file to .env
