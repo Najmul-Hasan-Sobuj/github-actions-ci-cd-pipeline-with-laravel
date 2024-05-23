@@ -39,8 +39,8 @@ jobs:
       - name: Create storage symlink
         run: php artisan storage:link  # Create a symbolic link to the storage directory
 
-      - name: Run database migrations
-        run: php artisan migrate --force  # Apply database migrations
+      # - name: Run database migrations
+      #   run: php artisan migrate --force  # Apply database migrations
 
       - name: Install Node.js
         uses: actions/setup-node@v3  # Set up the specified Node.js version
