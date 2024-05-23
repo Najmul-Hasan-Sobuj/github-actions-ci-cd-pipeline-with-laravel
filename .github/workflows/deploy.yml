@@ -1,61 +1,88 @@
+# .github/workflows/laravel-ci-cd.yml
 
-name: Deploy Laravel Project
+# Define the name of the workflow
+name: Laravel CI/CD
 
+# Specify the events that trigger the workflow
 on:
   push:
     branches:
-      - main
+      - main  # Trigger the workflow on push to the main branch
+  pull_request:
+    branches:
+      - main  # Trigger the workflow on pull requests to the main branch
 
+# Define the jobs to run
 jobs:
-  deploy:
-    name: Deploy to Production
-    runs-on: ubuntu-latest
+  # The build job
+  build:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu environment
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3  # Check out the repository code
 
-      - name: Install PHP and Composer
-        uses: shivammathur/setup-php@v2
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2  # Set up the specified PHP version
         with:
-          php-version: "8.1"
-
-      - name: Install Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "14"
+          php-version: '8.0'  # Specify the PHP version you are using
 
       - name: Install Composer dependencies
-        run: composer install --no-dev --optimize-autoloader
+        run: composer install --prefer-dist --no-progress --no-suggest --ignore-platform-reqs  # Install Laravel dependencies
 
-      - name: Copy .env file
-        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+      - name: Copy .env.example to .env
+        run: cp .env.example .env  # Copy the example environment file to .env
 
       - name: Generate application key
-        run: php artisan key:generate
+        run: php artisan key:generate  # Generate a new application key
 
-      - name: Generate storage link
-        run: php artisan storage:link
+      - name: Create storage symlink
+        run: php artisan storage:link  # Create a symbolic link to the storage directory
 
-      - name: Run database migrations and seeders
-        run: php artisan migrate --force && php artisan db:seed --force
+      - name: Run database migrations
+        run: php artisan migrate --force  # Apply database migrations
 
-      - name: Set permissions
-        run: |
-          sudo chgrp -R www-data storage bootstrap/cache
-          sudo chmod -R ug+rwx storage bootstrap/cache
-
-      - name: Deploy via SSH
-        uses: easingthemes/ssh-deploy@v2.1.8
+      - name: Install Node.js
+        uses: actions/setup-node@v3  # Set up the specified Node.js version
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          key: ${{ secrets.FTP_PASSWORD }}
-          port: ${{ secrets.FTP_PORT }}
-          source: ./
-          target: /
+          node-version: '16'  # Specify the Node.js version you are using
 
+      - name: Install NPM dependencies
+        run: npm install  # Install frontend dependencies
 
+      - name: Build assets
+        run: npm run production  # Build production assets
 
+      - name: Run tests
+        run: php artisan test  # Run Laravel tests
 
-          
+  # The deploy job
+  deploy:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu environment
+    needs: build  # This job depends on the successful completion of the build job
+    if: github.ref == 'refs/heads/main'  
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3  # Check out the repository code
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3  # Set up SSH for deployment
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}  # Use the SSH private key from GitHub Secrets
+
+      - name: Copy files via SCP
+        run: scp -r * najmulha@najmulhasan.xyz:public_html  # Copy the files to the server via SCP
+
+      - name: SSH into server and deploy
+        run: |
+          ssh najmulha@najmulhasan.xyz << 'EOF'
+          cd public_html
+          composer install --prefer-dist --no-progress --no-suggest --ignore-platform-reqs  # Install Laravel dependencies on the server
+          php artisan migrate --force  # Apply database migrations on the server
+          php artisan config:cache  # Cache the configuration
+          php artisan route:cache  # Cache the routes
+          php artisan view:cache  # Cache the views
+          npm install  # Install frontend dependencies on the server
+          npm run production  # Build production assets on the server
+          sudo systemctl restart apache2  # Restart the web server (adjust if using a different web server)
+          EOF
