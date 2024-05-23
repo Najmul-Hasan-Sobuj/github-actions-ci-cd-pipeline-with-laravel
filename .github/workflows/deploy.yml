@@ -86,3 +86,6 @@ jobs:
           npm run production  # Build production assets on the server
           sudo systemctl restart apache2  # Restart the web server (adjust if using a different web server)
           EOF
+
+
+          
