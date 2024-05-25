@@ -43,6 +43,4 @@ jobs:
         echo -e "HostName najmulhasan.xyz\n\tStrictHostKeyChecking no\n\tUser najmulha" >> ~/.ssh/config
         composer install
         vendor/bin/dep deploy     
-
-
         
