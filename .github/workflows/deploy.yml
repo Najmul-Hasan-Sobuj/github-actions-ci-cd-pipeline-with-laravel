@@ -72,11 +72,11 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}  # Use the SSH private key from GitHub Secrets
 
       - name: Copy files via SCP
-        run: scp -r * user@your-server:/path/to/your/laravel/project  # Copy the files to the server via SCP
+        run: scp -r * najmulha@your-server:/path/to/your/laravel/project  # Copy the files to the server via SCP
 
       - name: SSH into server and deploy
         run: |
-          ssh user@your-server << 'EOF'
+          ssh najmulha@your-server << 'EOF'
           cd /path/to/your/laravel/project
           composer install --prefer-dist --no-progress --no-suggest --ignore-platform-reqs  # Install Laravel dependencies on the server
           php artisan migrate --force  # Apply database migrations on the server
