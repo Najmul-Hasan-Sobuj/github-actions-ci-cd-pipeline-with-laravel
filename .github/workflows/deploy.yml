@@ -73,7 +73,8 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}  # Use the SSH private key from GitHub Secrets
 
       - name: Copy files via SCP
-        run: scp -r * najmulha@your-server:/path/to/your/laravel/project  # Copy the files to the server via SCP
+        run: scp -r * najmulha@portfolio.najmulhasan.xyz:/var/www/html/laravel_project
+        
 
       - name: SSH into server and deploy
         run: |
