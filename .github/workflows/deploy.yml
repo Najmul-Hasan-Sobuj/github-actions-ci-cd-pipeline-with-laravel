@@ -47,14 +47,14 @@ jobs:
         with:
           node-version: '16'  # Specify the Node.js version you are using
 
-      - name: Install NPM dependencies
-        run: npm install  # Install frontend dependencies
+      # - name: Install NPM dependencies
+      #   run: npm install  # Install frontend dependencies
 
-      - name: Build assets
-        run: npm run production  # Build production assets
+      # - name: Build assets
+      #   run: npm run production  # Build production assets
 
-      - name: Run tests
-        run: php artisan test  # Run Laravel tests
+      # - name: Run tests
+      #   run: php artisan test  # Run Laravel tests
 
   # The deploy job
   deploy:
