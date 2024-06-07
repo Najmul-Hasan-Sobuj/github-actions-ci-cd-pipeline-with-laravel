@@ -75,22 +75,14 @@ jobs:
     # - name: Build assets
     #   run: npm install && npm run production
 
-    - name: Deploy to production
-      if: github.ref == 'refs/heads/main'
-      env:
-        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
-        SSH_HOST: portfolio.najmulhasan.xyz
-        SSH_USERNAME: portfolio
-      run: |
-        echo "$DEPLOY_KEY" > portfolio.pem
-        chmod 600 portfolio.pem
-        ssh -i portfolio.pem -o StrictHostKeyChecking=no portfolio@$SSH_HOST << 'EOF'
-          cd /portfolio.najmulhasan.xyz/public
-          git pull origin main
-          composer install --prefer-dist --no-dev --no-interaction --optimize-autoloader
-          php artisan migrate --force
-          npm install
-          npm run production
-          php artisan config:cache
-          php artisan route:cache
-        EOF
+    - name: FTP Deploy
+      uses: SamKirkland/FTP-Deploy-Action@4.0.0
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        server-dir: ${{ secrets.FTP_DIR }}
+
+
+
+        
