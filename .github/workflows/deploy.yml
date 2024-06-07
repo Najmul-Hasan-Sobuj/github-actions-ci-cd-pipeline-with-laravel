@@ -80,11 +80,11 @@ jobs:
       env:
         DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
         SSH_HOST: portfolio.najmulhasan.xyz
-        SSH_USERNAME: najmul
+        SSH_USERNAME: portfolio
       run: |
         echo "$DEPLOY_KEY" > portfolio.pem
         chmod 600 portfolio.pem
-        ssh -i portfolio.pem -o StrictHostKeyChecking=no najmul@$SSH_HOST << 'EOF'
+        ssh -i portfolio.pem -o StrictHostKeyChecking=no portfolio@$SSH_HOST << 'EOF'
           cd /portfolio.najmulhasan.xyz/public
           git pull origin main
           composer install --prefer-dist --no-dev --no-interaction --optimize-autoloader
