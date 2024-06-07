@@ -54,3 +54,8 @@ jobs:
         echo -e "HostName example.com\n\tStrictHostKeyChecking no\n\tUser deploy" >> ~/.ssh/config
         composer install
         vendor/bin/dep deploy
+
+
+
+
+        
