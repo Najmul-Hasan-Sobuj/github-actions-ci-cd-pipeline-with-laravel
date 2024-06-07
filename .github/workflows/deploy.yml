@@ -48,13 +48,8 @@ jobs:
         eval "$(ssh-agent -s)"
         echo "${DEPLOY_KEY}" > deploy_key
         chmod 600 deploy_key
-        ssh-keygen -y -f deploy_key > /dev/null
-        if [ $? -eq 0 ]; then
-          ssh-add deploy_key
-        else
-          echo "Invalid SSH key format"
-          exit 1
-        fi
+        ssh-keygen -p -m PEM -f deploy_key -N ""
+        ssh-add deploy_key
         mkdir -p ~/.ssh
         echo -e "HostName example.com\n\tStrictHostKeyChecking no\n\tUser deploy" >> ~/.ssh/config
         composer install
