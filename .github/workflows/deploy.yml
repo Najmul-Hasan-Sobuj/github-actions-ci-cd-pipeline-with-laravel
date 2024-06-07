@@ -81,7 +81,7 @@ jobs:
         SSH_HOST: portfolio.najmulhasan.xyz
         SSH_USERNAME: najmul
       run: |
-        echo "$SSH_PRIVATE_KEY" > private_key
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
         chmod 600 private_key
         ssh -i private_key -o StrictHostKeyChecking=no $SSH_USERNAME@$SSH_HOST "echo 'SSH connection established'"
 
