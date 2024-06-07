@@ -46,8 +46,16 @@ jobs:
         DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
       run: |
         eval "$(ssh-agent -s)"
-        ssh-add - <<< "${DEPLOY_KEY}"
-        mkdir ~/.ssh
-        echo -e "HostName example.com\n\tStrictHostKeyChecking no\n\t"User deploy >> ~/.ssh/config
+        echo "${DEPLOY_KEY}" > deploy_key
+        chmod 600 deploy_key
+        ssh-keygen -y -f deploy_key > /dev/null
+        if [ $? -eq 0 ]; then
+          ssh-add deploy_key
+        else
+          echo "Invalid SSH key format"
+          exit 1
+        fi
+        mkdir -p ~/.ssh
+        echo -e "HostName example.com\n\tStrictHostKeyChecking no\n\tUser deploy" >> ~/.ssh/config
         composer install
         vendor/bin/dep deploy
