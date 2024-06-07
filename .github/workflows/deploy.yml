@@ -72,8 +72,8 @@ jobs:
     #     DB_PASSWORD: VZI!8m{%oM)0
     #   run: php artisan test
 
-    - name: Build assets
-      run: npm install && npm run production
+    # - name: Build assets
+    #   run: npm install && npm run production
 
     - name: Deploy to production
       if: github.ref == 'refs/heads/main'
