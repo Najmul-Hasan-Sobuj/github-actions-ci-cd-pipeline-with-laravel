@@ -80,7 +80,7 @@ jobs:
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         SSH_HOST: portfolio.najmulhasan.xyz
-        SSH_USERNAME: najmul
+        SSH_USERNAME: najmulha
       run: |
         echo "$SSH_PRIVATE_KEY" > private_key
         chmod 600 private_key
