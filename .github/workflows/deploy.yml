@@ -72,19 +72,19 @@ jobs:
     #     DB_PASSWORD: VZI!8m{%oM)0
     #   run: php artisan test
 
-    # - name: Build assets
-    #   run: npm install && npm run production
+    - name: Build assets
+      run: npm install && npm run production
 
     - name: Deploy to production
       if: github.ref == 'refs/heads/main'
       env:
         DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
         SSH_HOST: portfolio.najmulhasan.xyz
-        SSH_USERNAME: portfolio
+        SSH_USERNAME: najmul
       run: |
-        echo "$DEPLOY_KEY" > private_key
-        chmod 600 private_key
-        ssh -i private_key -o StrictHostKeyChecking=no portfolio@$SSH_HOST << 'EOF'
+        echo "$DEPLOY_KEY" > portfolio.pem
+        chmod 600 portfolio.pem
+        ssh -i portfolio.pem -o StrictHostKeyChecking=no najmul@$SSH_HOST << 'EOF'
           cd /portfolio.najmulhasan.xyz/public
           git pull origin main
           composer install --prefer-dist --no-dev --no-interaction --optimize-autoloader
@@ -94,9 +94,3 @@ jobs:
           php artisan config:cache
           php artisan route:cache
         EOF
-
-
-
-
-
-
