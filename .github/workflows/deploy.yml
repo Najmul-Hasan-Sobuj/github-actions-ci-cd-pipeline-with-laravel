@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Laravel CI/CD
 
 on:
   push:
@@ -9,66 +9,88 @@ on:
       - main
 
 jobs:
-  laravel-tests:
+  build:
+
     runs-on: ubuntu-latest
+
     services:
       mysql:
         image: mysql:5.7
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: tracy_test
+          MYSQL_DATABASE: najmulha_portfolio
+          MYSQL_USER: portfolio
+          MYSQL_PASSWORD: VZI!8m{%oM)0
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
         ports:
-          - 3307:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+          - 3306:3306
+        volumes:
+          - /var/lib/mysql
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Copy .env
-      run: php -r "file_exists('.env') || copy('.env.ci', '.env');"
-      
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.1
+        extensions: mbstring, xml, ctype, json, mysql
+        ini-values: post_max_size=256M, max_execution_time=300
+        coverage: none
 
-    - name: Install Dependencies
-      run: composer install -q --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
+    - name: Install Composer dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
+
+    - name: Copy .env.example to .env
+      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
 
     - name: Generate application key
       run: php artisan key:generate
 
-    # - name: Set up Passport
-    #   run: php artisan passport:keys
+    - name: Run database migrations
+      env:
+        DB_CONNECTION: mysql
+        DB_HOST: 127.0.0.1
+        DB_PORT: 3306
+        DB_DATABASE: najmulha_portfolio
+        DB_USERNAME: portfolio
+        DB_PASSWORD: VZI!8m{%oM)0
+      run: php artisan migrate --force
 
-    # - name: Execute tests (Unit and Feature tests) via PHPUnit
-    #   run: vendor/bin/phpunit
+    # - name: Run tests
+    #   env:
+    #     DB_CONNECTION: mysql
+    #     DB_HOST: 127.0.0.1
+    #     DB_PORT: 3306
+    #     DB_DATABASE: najmulha_portfolio
+    #     DB_USERNAME: portfolio
+    #     DB_PASSWORD: VZI!8m{%oM)0
+    #   run: php artisan test
 
-  deploy:
-    if: github.ref == 'refs/heads/main'
-    needs: [laravel-tests]
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    # - name: Build assets
+    #   run: npm install && npm run production
 
-    - name: Deploy
+    - name: Deploy to production
+      if: github.ref == 'refs/heads/main'
       env:
         DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+        SSH_HOST: portfolio.najmulhasan.xyz
+        SSH_USERNAME: najmul
       run: |
-        eval "$(ssh-agent -s)"
-        ssh-add - <<< "${DEPLOY_KEY}"
-        mkdir ~/.ssh
-        echo -e "HostName example.com\n\tStrictHostKeyChecking no\n\t"User deploy >> ~/.ssh/config
-        composer install
-        vendor/bin/dep deploy
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        echo "$DEPLOY_KEY" > private_key
+        chmod 600 private_key
+        ssh -i private_key -o StrictHostKeyChecking=no najmul@$SSH_HOST << 'EOF'
+          cd /portfolio.najmulhasan.xyz/public
+          git pull origin main
+          composer install --prefer-dist --no-dev --no-interaction --optimize-autoloader
+          php artisan migrate --force
+          npm install
+          npm run production
+          php artisan config:cache
+          php artisan route:cache
+        EOF
