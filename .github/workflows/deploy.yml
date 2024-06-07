@@ -75,8 +75,7 @@ jobs:
     # - name: Build assets
     #   run: npm install && npm run production
 
-    - name: Deploy to production
-      if: github.ref == 'refs/heads/main'
+    - name: Setup SSH and Test Connection
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         SSH_HOST: portfolio.najmulhasan.xyz
@@ -84,8 +83,17 @@ jobs:
       run: |
         echo "$SSH_PRIVATE_KEY" > private_key
         chmod 600 private_key
-        ssh -i private_key -o StrictHostKeyChecking=no najmul@$SSH_HOST << 'EOF'
-          cd portfolio.najmulhasan.xyz
+        ssh -i private_key -o StrictHostKeyChecking=no $SSH_USERNAME@$SSH_HOST "echo 'SSH connection established'"
+
+    - name: Deploy to production
+      if: github.ref == 'refs/heads/main'
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SSH_HOST: portfolio.najmulhasan.xyz
+        SSH_USERNAME: najmul
+      run: |
+        ssh -i private_key -o StrictHostKeyChecking=no $SSH_USERNAME@$SSH_HOST << 'EOF'
+          cd /path/to/your/project
           git pull origin main
           composer install --prefer-dist --no-dev --no-interaction --optimize-autoloader
           php artisan migrate --force
