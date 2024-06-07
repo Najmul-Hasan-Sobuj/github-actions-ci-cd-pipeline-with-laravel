@@ -78,7 +78,56 @@ jobs:
     - name: Deploy to production
       if: github.ref == 'refs/heads/main'
       env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SSH_PRIVATE_KEY: |
+          -----BEGIN OPENSSH PRIVATE KEY-----
+          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
+          -----END OPENSSH PRIVATE KEY-----
         SSH_HOST: portfolio.najmulhasan.xyz
         SSH_USERNAME: najmul
       run: |
