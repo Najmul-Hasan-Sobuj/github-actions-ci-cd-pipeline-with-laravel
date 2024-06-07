@@ -75,24 +75,31 @@ jobs:
     # - name: Build assets
     #   run: npm install && npm run production
 
-    - name: Setup SSH
-      uses: webfactory/ssh-agent@v0.5.3
-      with:
-        ssh-private-key: ${{ secrets.DEPLOY_KEY }}
-
     - name: Deploy
       run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
-          cd portfolio.najmulhasan.xyz/
+        echo "Starting deployment..."
+        echo "SSH_HOST: ${{ secrets.SSH_HOST }}"
+        echo "SSH_USERNAME: ${{ secrets.SSH_USERNAME }}"
+        ssh -v -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+          echo "Connected to the server."
+          echo "Changing directory to portfolio.najmulhasan.xyz/"
+          cd portfolio.najmulhasan.xyz/ || exit
+          echo "Pulling latest changes from main branch..."
           git pull origin main
+          echo "Installing Composer dependencies..."
           composer install --prefer-dist --no-dev --no-interaction --optimize-autoloader
+          echo "Running database migrations..."
           php artisan migrate --force
+          echo "Installing NPM dependencies and building assets..."
           npm install
           npm run production
+          echo "Caching configuration and routes..."
           php artisan config:cache
           php artisan route:cache
+          echo "Deployment completed."
         EOF
 
 
-
-        
+# /////////////////
+        # SSH_HOST : 192.200.117.130
+        # SSH_USERNAME : portfolio
