@@ -82,8 +82,8 @@ jobs:
         echo "SSH_USERNAME: ${{ secrets.SSH_USERNAME }}"
         ssh -v -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
           echo "Connected to the server."
-          echo "Changing directory to /home/najmulha/portfolio.najmulhasan.xyz"
-          cd /home/najmulha/portfolio.najmulhasan.xyz || { echo "Failed to change directory"; exit 1; }
+          echo "Changing directory to portfolio.najmulhasan.xyz"
+          cd portfolio.najmulhasan.xyz || { echo "Failed to change directory"; exit 1; }
           echo "Pulling latest changes from main branch..."
           git pull origin main || { echo "Failed to pull changes"; exit 1; }
           echo "Installing Composer dependencies..."
