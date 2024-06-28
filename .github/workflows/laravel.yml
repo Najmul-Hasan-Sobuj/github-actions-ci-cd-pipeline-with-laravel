@@ -34,15 +34,16 @@ jobs:
         mkdir -p ~/.ssh
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H najmulhasan.xyz >> ~/.ssh/known_hosts
+        ssh-keyscan -H najmulhasan.xyz >> ~/.ssh/known_hosts 2>&1 || { echo "ssh-keyscan failed" >&2; exit 1; }
         
         # SCP to transfer files to remote server with verbose output
-        scp -v -r * najmulha@najmulhasan.xyz:/home/najmulha/public_html || { echo "SCP command failed"; exit 1; }
+        scp -v -r * najmulha@najmulhasan.xyz:/home/najmulha/public_html || { echo "SCP command failed" >&2; exit 1; }
         
         # SSH commands to finalize deployment with error handling
-        ssh -v najmulha@najmulhasan.xyz << EOF
+        ssh -v najmulha@najmulhasan.xyz 'bash -s' << 'EOF'
           set -e  # Ensure the script exits on first error
-          cd /home/najmulha/public_html
-          php artisan migrate --force || { echo "Artisan migrate failed"; exit 1; }
+          set -x  # Print each command before executing it
+          cd /home/najmulha/public_html || { echo "Changing directory failed" >&2; exit 1; }
+          php artisan migrate --force || { echo "Artisan migrate failed" >&2; exit 1; }
           # Any other deployment commands here
         EOF
