@@ -34,14 +34,14 @@ jobs:
         mkdir -p ~/.ssh
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H your_cpanel_host.com >> ~/.ssh/known_hosts
+        ssh-keyscan -H najmulhasan.xyz >> ~/.ssh/known_hosts
         
         # SCP to transfer files to remote server
-        scp -r * username@your_cpanel_host.com:/path/to/your/project
+        scp -r * najmulha@najmulhasan.xyz:/home/najmulha/public_html
         
         # SSH commands to finalize deployment
-        ssh username@your_cpanel_host.com << EOF
-          cd /path/to/your/project
+        ssh najmulha@najmulhasan.xyz << EOF
+          cd /home/najmulha/public_html
           php artisan migrate --force
           # Any other deployment commands here
         EOF
