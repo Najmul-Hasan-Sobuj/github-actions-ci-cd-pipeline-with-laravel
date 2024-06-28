@@ -28,7 +28,7 @@ jobs:
     - name: Deploy to cPanel
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        CPANEL_API_KEY: ${{ secrets.CPANEL_API_KEY }} # Example usage, adjust based on actual API interaction
+        CPANEL_API_KEY: ${{ secrets.CPANEL_API_KEY }} 
       run: |
         # Setup SSH Agent
         mkdir -p ~/.ssh
