@@ -36,12 +36,13 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H najmulhasan.xyz >> ~/.ssh/known_hosts
         
-        # SCP to transfer files to remote server
-        scp -r * najmulha@najmulhasan.xyz:/home/najmulha/public_html
+        # SCP to transfer files to remote server with verbose output
+        scp -v -r * najmulha@najmulhasan.xyz:/home/najmulha/public_html || { echo "SCP command failed"; exit 1; }
         
-        # SSH commands to finalize deployment
-        ssh najmulha@najmulhasan.xyz << EOF
+        # SSH commands to finalize deployment with error handling
+        ssh -v najmulha@najmulhasan.xyz << EOF
+          set -e  # Ensure the script exits on first error
           cd /home/najmulha/public_html
-          php artisan migrate --force
+          php artisan migrate --force || { echo "Artisan migrate failed"; exit 1; }
           # Any other deployment commands here
         EOF
